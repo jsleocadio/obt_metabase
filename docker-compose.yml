@@ -1,0 +1,82 @@
+version: '3'
+
+services:
+  spark:
+    container_name: spark
+    build: 
+      context: .
+      dockerfile: Dockerfile.spark
+    volumes:
+      - ./jobs:/opt/spark/jobs
+    ports:
+      - "9090:8080"
+      - "7077:7077"
+    command: bin/spark-class org.apache.spark.deploy.master.Master
+    networks:
+      - obt
+
+  jupyter:
+    container_name: jupyter
+    build: 
+      context: .
+      dockerfile: Dockerfile.jupyter
+    volumes:
+      - ./jobs:/home/jovyan/jobs
+    ports:
+      - "${PORT_JUPYTER}:8888"
+    command: "start-notebook.sh --NotebookApp.token='123' --NotebookApp.password=''"
+    networks:
+      - obt
+
+  postgres:
+    container_name: postgres
+    image: postgres:15-alpine
+    environment:
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - POSTGRES_DB=${POSTGRES_DB}
+    volumes:
+      - ./data:/var/lib/postgresql/data
+    ports:
+      - "${PORT_POSTGRES}:5432"
+    networks:
+      - obt
+
+  metabase:
+    container_name: metabase
+    build:
+      context: .
+      dockerfile: Dockerfile.metabase
+    environment:
+      MB_DB_TYPE: postgres
+      MB_DB_HOST: postgres
+      MB_DB_PORT: 5432
+      MB_DB_DBNAME: ${POSTGRES_DB}
+      MB_DB_USER: ${POSTGRES_USER}
+      MB_DB_PASS: ${POSTGRES_PASSWORD}
+      JAVA_TIMEZONE: America/Recife
+      TZ: America/Recife      
+    ports:
+      - ${PORT_BI}:3000       
+    depends_on:
+      - postgres
+    networks:
+      - obt
+  
+  pgadmin:
+    container_name: pgadmin
+    image: dpage/pgadmin4:8.2
+    environment:
+      - PGADMIN_DEFAULT_EMAIL=${PGADMIN_DEFAULT_EMAIL}
+      - PGADMIN_DEFAULT_PASSWORD=${PGADMIN_DEFAULT_PASSWORD}
+    ports:
+      - "${PORT_PGADMIN}:80"
+    depends_on:
+      - postgres
+    networks:
+      - obt
+
+
+networks:
+  obt:
+    driver: bridge

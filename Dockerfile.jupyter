@@ -1,0 +1,12 @@
+FROM jupyter/pyspark-notebook:python-3.11
+
+USER root
+# Configurar o locale para pt_BR.UTF-8
+RUN apt-get update 
+RUN apt-get install -y locales 
+RUN rm -rf /var/lib/apt/lists/* 
+RUN localedef -i pt_BR -c -f UTF-8 -A /usr/share/locale/locale.alias pt_BR.UTF-8
+ENV LANG pt_BR.UTF-8
+ENV LANGUAGE pt_BR:pt
+ENV LC_ALL pt_BR.UTF-8
+USER jovyan

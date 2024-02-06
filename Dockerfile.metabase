@@ -1,0 +1,2 @@
+FROM metabase/metabase:latest
+RUN echo "alias ll='ls -la'" > /root/.bashrc
