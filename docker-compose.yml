@@ -1,20 +1,6 @@
 version: '3'
 
 services:
-  spark:
-    container_name: spark
-    build: 
-      context: .
-      dockerfile: Dockerfile.spark
-    volumes:
-      - ./jobs:/opt/spark/jobs
-    ports:
-      - "9090:8080"
-      - "7077:7077"
-    command: bin/spark-class org.apache.spark.deploy.master.Master
-    networks:
-      - obt
-
   jupyter:
     container_name: jupyter
     build: 
